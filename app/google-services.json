@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "234549576592",
+    "firebase_url": "https://economix-8c4aa.firebaseio.com",
+    "project_id": "economix-8c4aa",
+    "storage_bucket": "economix-8c4aa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234549576592:android:519b1034491190f5",
+        "android_client_info": {
+          "package_name": "br.com.aguardente.economix"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "234549576592-ejuhgf5dnveqidl0afg2et9nh3asgu0i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.aguardente.economix",
+            "certificate_hash": "200129dc12b2398f1a9a98470f6fe7f1ae56802d"
+          }
+        },
+        {
+          "client_id": "234549576592-kr9c4jn2gaiengd7s8m0bcd5f2hc3vj0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.aguardente.economix",
+            "certificate_hash": "6d8b3664cb43213ad9c015762e8fdbba44a128c0"
+          }
+        },
+        {
+          "client_id": "234549576592-tu5srd69331tj30jlo19aloqi9j6ai1o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBP9YEEDGMy6O945kEY7hhHqewuQtnotEw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "234549576592-tu5srd69331tj30jlo19aloqi9j6ai1o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
