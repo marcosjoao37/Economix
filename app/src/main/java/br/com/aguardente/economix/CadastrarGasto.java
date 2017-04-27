@@ -61,7 +61,7 @@ public class CadastrarGasto extends AppCompatActivity {
             // when dialog box is closed, below method will be called.
             public void onDateSet(DatePicker view, int selectedYear, int selectedMonth, int selectedDay) {
                 try {
-                    editTextQuando.setText(selectedDay + "/" + selectedMonth + "/" + selectedYear);
+                    editTextQuando.setText(selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

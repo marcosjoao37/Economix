@@ -11,6 +11,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import br.com.aguardente.economix.models.Gasto;
 import br.com.aguardente.economix.models.Usuario;
 
@@ -44,11 +47,17 @@ public class GastoDao {
     public void salvarGasto(Usuario usuario, Gasto gasto) {
         if (canDo) {
             onStart("Registrando gasto...");
-            Log.d(TAG, "Salvando gasto...");
+            Log.d(TAG, "Registrando gasto...");
             myRef = database.getReference();
             String key = myRef.child("users").child(usuario.getUid()).push().getKey();
-            myRef.child("users").child(usuario.getUid()).child("gastos").child(key)
-                    .setValue(gasto).addOnCompleteListener(new OnCompleteListener<Void>() {
+            gasto.setUid(key);
+
+            Map<String, Object> gastoValues = gasto.toMap();
+            Map<String, Object> childUpdates = new HashMap<>();
+            childUpdates.put("/users/" + usuario.getUid() + "/gastos/" + key, gastoValues);
+            childUpdates.put("/users/" + usuario.getUid() + "/dias/" + gasto.getData() + "/" + key, gastoValues);
+
+            myRef.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
@@ -58,6 +67,18 @@ public class GastoDao {
                     }
                 }
             });
+
+//            myRef.child("users").child(usuario.getUid()).child("gastos").child(key)
+//                    .setValue(gasto).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                @Override
+//                public void onComplete(@NonNull Task<Void> task) {
+//                    if (task.isSuccessful()) {
+//                        onSuccess("Gasto registrado!");
+//                    } else {
+//                        onFail("Gasto não registrado!");
+//                    }
+//                }
+//            });
         }
     }
 

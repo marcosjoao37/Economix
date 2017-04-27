@@ -17,7 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".CadastrarGasto" />
-        <activity android:name=".Login"></activity>
+        <activity android:name=".Login" />
+        <activity android:name=".GastosDiaEscolhido"></activity>
     </application>
 
 </manifest>
