@@ -20,5 +20,4 @@
         <activity android:name=".Login" />
         <activity android:name=".GastosDiaEscolhido"></activity>
     </application>
-
 </manifest>
