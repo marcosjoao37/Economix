@@ -70,13 +70,15 @@ public class MainActivity extends AppCompatActivity {
     private double totalGasto;
     private TextView txtTotalGasto;
 
+    private boolean started;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         activity = this;
 
-        carregarCalendario();
+        started = false;
 
         backgroundForDateMap = new HashMap<>();
         textColorForDateMap = new HashMap<>();
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
-        if (mAuth != null) {
+        if (mAuth != null && currentUser != null) {
             if (Static.usuario == null) {
                 Toast.makeText(activity, currentUser.getDisplayName() + "", Toast.LENGTH_SHORT).show();
                 Static.usuario = new Usuario(
@@ -105,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
 
             database = FirebaseDatabase.getInstance();
             dataChanges();
+            carregarCalendario();
+            started = true;
         }
     }
 
@@ -179,59 +183,61 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void carregarCalendario() {
-        caldroidFragment = new CaldroidFragment();
-        Bundle args = new Bundle();
-        Calendar cal = Calendar.getInstance();
-        args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
-        args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
-        caldroidFragment.setArguments(args);
+        if (caldroidFragment == null) {
+            caldroidFragment = new CaldroidFragment();
+            Bundle args = new Bundle();
+            Calendar cal = Calendar.getInstance();
+            args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
+            args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
+            caldroidFragment.setArguments(args);
 
-        if (caldroidListener == null) {
-            caldroidListener = new CaldroidListener() {
-                @Override
-                public void onSelectDate(Date date, View view) {
-                    criarDialogoGastosDoDia(date);
-                }
+            if (caldroidListener == null) {
+                caldroidListener = new CaldroidListener() {
+                    @Override
+                    public void onSelectDate(Date date, View view) {
+                        criarDialogoGastosDoDia(date);
+                    }
 
-                @Override
-                public void onChangeMonth(int month, int year) {
-                    super.onChangeMonth(month, year);
-                    // get today and clear time of day
-                    Calendar cal = Calendar.getInstance();
-                    cal.set(Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
-                    cal.clear(Calendar.MINUTE);
-                    cal.clear(Calendar.SECOND);
-                    cal.clear(Calendar.MILLISECOND);
-                    cal.set(year, month - 1, 1);
-                    totalGasto = 0.0;
-                    txtTotalGasto.setText(totalGasto + "");
-                    List<Date> datesForBackground = new ArrayList<>(backgroundForDateMap.keySet());
-                    List<Date> datesForFonts = new ArrayList<>(textColorForDateMap.keySet());
+                    @Override
+                    public void onChangeMonth(int month, int year) {
+                        super.onChangeMonth(month, year);
+                        // get today and clear time of day
+                        Calendar cal = Calendar.getInstance();
+                        cal.set(Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
+                        cal.clear(Calendar.MINUTE);
+                        cal.clear(Calendar.SECOND);
+                        cal.clear(Calendar.MILLISECOND);
+                        cal.set(year, month - 1, 1);
+                        totalGasto = 0.0;
+                        txtTotalGasto.setText(totalGasto + "");
+                        List<Date> datesForBackground = new ArrayList<>(backgroundForDateMap.keySet());
+                        List<Date> datesForFonts = new ArrayList<>(textColorForDateMap.keySet());
 
-                    caldroidFragment.clearBackgroundDrawableForDates(datesForBackground);
-                    caldroidFragment.clearTextColorForDates(datesForFonts);
+                        caldroidFragment.clearBackgroundDrawableForDates(datesForBackground);
+                        caldroidFragment.clearTextColorForDates(datesForFonts);
 
-                    // get start of the month
-                    cal.set(Calendar.DAY_OF_MONTH, 1);
-                    Date inicio = cal.getTime();
+                        // get start of the month
+                        cal.set(Calendar.DAY_OF_MONTH, 1);
+                        Date inicio = cal.getTime();
 
-                    // get start of the next month
-                    cal.add(Calendar.MONTH, 1);
-                    cal.add(Calendar.DAY_OF_YEAR, -1);
-                    Date fim = cal.getTime();
+                        // get start of the next month
+                        cal.add(Calendar.MONTH, 1);
+                        cal.add(Calendar.DAY_OF_YEAR, -1);
+                        Date fim = cal.getTime();
 
-                    databaseReference = database.getReference("users/" + Static.usuario.getUid() + "/gastos")
-                            .orderByChild("data").startAt(inicio.getTime()).endAt(fim.getTime());
-                    dataChanges();
-                    databaseReference.addChildEventListener(gastosChangedListener);
-                }
-            };
+                        databaseReference = database.getReference("users/" + Static.usuario.getUid() + "/gastos")
+                                .orderByChild("data").startAt(inicio.getTime()).endAt(fim.getTime());
+                        dataChanges();
+                        databaseReference.addChildEventListener(gastosChangedListener);
+                    }
+                };
+            }
+
+            caldroidFragment.setCaldroidListener(caldroidListener);
+            android.support.v4.app.FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+            t.replace(R.id.calendario, caldroidFragment);
+            t.commit();
         }
-
-        caldroidFragment.setCaldroidListener(caldroidListener);
-        android.support.v4.app.FragmentTransaction t = getSupportFragmentManager().beginTransaction();
-        t.replace(R.id.calendario, caldroidFragment);
-        t.commit();
     }
 
     private void criarDialogoGastosDoDia(final Date date) {
@@ -324,6 +330,12 @@ public class MainActivity extends AppCompatActivity {
                         currentUser.getEmail(),
                         currentUser.getEmail() // username
                 );
+            }
+            if (!started) {
+                database = FirebaseDatabase.getInstance();
+                dataChanges();
+                carregarCalendario();
+                started = true;
             }
         }
     }
