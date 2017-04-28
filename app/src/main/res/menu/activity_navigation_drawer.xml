@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Gastos">
+        <menu>
+            <item
+                android:id="@+id/nav_listar_todos_gastos"
+                android:icon="@mipmap/ic_list_black_24dp"
+                android:title="Listar" />
+            <item
+                android:id="@+id/nav_compartilhar"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Compartilhar" />
+        </menu>
+    </item>
+
+</menu>

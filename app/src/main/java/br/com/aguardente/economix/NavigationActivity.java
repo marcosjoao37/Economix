@@ -1,7 +1,6 @@
 package br.com.aguardente.economix;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,10 +8,19 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,12 +33,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,8 +49,8 @@ import br.com.aguardente.economix.conf.Static;
 import br.com.aguardente.economix.models.Gasto;
 import br.com.aguardente.economix.models.Usuario;
 
-public class MainActivity extends AppCompatActivity {
-
+public class NavigationActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MAIN_ACTIVITY";
     Activity activity;
 
@@ -70,23 +76,38 @@ public class MainActivity extends AppCompatActivity {
     private double totalGasto;
     private TextView txtTotalGasto;
 
+    private TextView nomeUsuario;
+    private TextView emailUsuario;
+
     private boolean started;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         activity = this;
+        setContentView(R.layout.activity_navigation);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Economix");
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        View header = navigationView.getHeaderView(0);
 
         started = false;
-
         backgroundForDateMap = new HashMap<>();
         textColorForDateMap = new HashMap<>();
-
         dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
         totalGasto = 0.0;
         txtTotalGasto = (TextView) findViewById(R.id.totalGasto);
+        nomeUsuario = (TextView) header.findViewById(R.id.nome);
+        emailUsuario = (TextView) header.findViewById(R.id.email);
 
         drawable = new GradientDrawable();
         drawable.setShape(GradientDrawable.RECTANGLE);
@@ -96,12 +117,14 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         if (mAuth != null && currentUser != null) {
+            nomeUsuario.setText(currentUser.getDisplayName());
+            emailUsuario.setText(currentUser.getEmail());
             if (Static.usuario == null) {
                 Toast.makeText(activity, currentUser.getDisplayName() + "", Toast.LENGTH_SHORT).show();
                 Static.usuario = new Usuario(
                         currentUser.getUid(),
                         currentUser.getEmail(),
-                        currentUser.getEmail() // username
+                        currentUser.getDisplayName() // username
                 );
             }
 
@@ -110,6 +133,55 @@ public class MainActivity extends AppCompatActivity {
             carregarCalendario();
             started = true;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.navigation, menu);
+//        return true;
+//    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_listar_todos_gastos) {
+            Toast.makeText(activity, "Em breve...", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_compartilhar) {
+            Toast.makeText(activity, "Em breve...", Toast.LENGTH_SHORT).show();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     public void dataChanges() {
@@ -323,12 +395,14 @@ public class MainActivity extends AppCompatActivity {
         if (currentUser == null) {
             startActivityForResult(new Intent(activity, Login.class), LOGIN);
         } else {
+            nomeUsuario.setText(currentUser.getDisplayName());
+            emailUsuario.setText(currentUser.getEmail());
             if (Static.usuario == null) {
                 Toast.makeText(activity, currentUser.getDisplayName() + "", Toast.LENGTH_SHORT).show();
                 Static.usuario = new Usuario(
                         currentUser.getUid(),
                         currentUser.getEmail(),
-                        currentUser.getEmail() // username
+                        currentUser.getDisplayName() // username
                 );
             }
             if (!started) {

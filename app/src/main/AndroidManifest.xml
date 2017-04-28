@@ -9,15 +9,19 @@
         android:roundIcon="@mipmap/economix_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".CadastrarGasto" />
+        <activity android:name=".Login" />
+        <activity android:name=".GastosDiaEscolhido" />
+        <activity
+            android:name=".NavigationActivity"
+            android:label="@string/title_activity_navigation"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CadastrarGasto" />
-        <activity android:name=".Login" />
-        <activity android:name=".GastosDiaEscolhido"></activity>
     </application>
+
 </manifest>
