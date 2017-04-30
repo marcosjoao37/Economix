@@ -1,8 +1,11 @@
 package br.com.aguardente.economix.daos;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -27,10 +30,10 @@ public class GastoDao {
 
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
-    private DatabaseReference myRef;
 
     private boolean canDo = false;
     private Activity activity;
+    private Context context;
     private Toast toastOnStart;
 
     public GastoDao(Activity activity) {
@@ -44,11 +47,22 @@ public class GastoDao {
         }
     }
 
+    public GastoDao(Context context) {
+        this.context = context;
+        mAuth = FirebaseAuth.getInstance();
+        if (mAuth != null) {
+            database = FirebaseDatabase.getInstance();
+        }
+        if (database != null) {
+            canDo = true;
+        }
+    }
+
     public void salvarGasto(Usuario usuario, Gasto gasto) {
         if (canDo) {
-            onStart("Registrando gasto...");
+            Toast.makeText(activity, "Registrando gasto...", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Registrando gasto...");
-            myRef = database.getReference();
+            DatabaseReference myRef = database.getReference();
             String key = myRef.child("users").child(usuario.getUid()).push().getKey();
             gasto.setUid(key);
 
@@ -61,9 +75,13 @@ public class GastoDao {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
-                        onSuccess("Gasto registrado!");
+                        Toast.makeText(activity, "Gasto registrado!", Toast.LENGTH_SHORT).show();
+                        activity.setResult(Activity.RESULT_OK);
+                        activity.finish();
                     } else {
-                        onFail("Gasto não registrado!");
+                        Toast.makeText(activity, "Gasto não registrado!", Toast.LENGTH_SHORT).show();
+                        activity.setResult(Activity.RESULT_CANCELED);
+                        activity.finish();
                     }
                 }
             });
@@ -82,22 +100,30 @@ public class GastoDao {
         }
     }
 
-    public void onStart(String msg) {
-        toastOnStart = Toast.makeText(activity, msg, Toast.LENGTH_SHORT);
-        toastOnStart.show();
-    }
+    public void deletarGasto(Usuario usuario, Gasto gasto, final CardView cardView) {
+        if (canDo) {
+            Toast.makeText(context, "Deletando gasto...", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Deletando gasto...");
+            DatabaseReference myRef =
+                    database.getReference("users/" + usuario.getUid() + "/gastos/" + gasto.getUid());
 
-    public void onSuccess(String msg) {
-        toastOnStart.cancel();
-        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
-        activity.setResult(Activity.RESULT_OK);
-        activity.finish();
-    }
+            DatabaseReference myRef2 =
+                    database.getReference("users/" + usuario.getUid() + "/dias/"
+                            + gasto.getData() + "/" + gasto.getUid());
 
-    public void onFail(String msg) {
-        toastOnStart.cancel();
-        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
-        activity.setResult(Activity.RESULT_CANCELED);
-        activity.finish();
+            myRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(context, "Gasto deletado!", Toast.LENGTH_SHORT).show();
+                        cardView.setVisibility(View.GONE);
+                    } else {
+                        Toast.makeText(context, "Gasto não deletado!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            myRef2.removeValue();
+        }
     }
 }

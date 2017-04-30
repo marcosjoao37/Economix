@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="br.com.aguardente.economix.NavigationActivity"
-    tools:showIn="@layout/app_bar_navigation">
+    tools:showIn="@layout/app_bar_navigation"
+    tools:view="br.com.aguardente.economix.NavigationActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
