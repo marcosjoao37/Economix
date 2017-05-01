@@ -17,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
+import br.com.aguardente.economix.FiltrarGastos;
 import br.com.aguardente.economix.models.Gasto;
 import br.com.aguardente.economix.models.Usuario;
 
@@ -34,10 +35,10 @@ public class GastoDao {
     private boolean canDo = false;
     private Activity activity;
     private Context context;
-    private Toast toastOnStart;
 
     public GastoDao(Activity activity) {
         this.activity = activity;
+        context = activity.getApplication();
         mAuth = FirebaseAuth.getInstance();
         if (mAuth != null) {
             database = FirebaseDatabase.getInstance();
@@ -117,6 +118,32 @@ public class GastoDao {
                     if (task.isSuccessful()) {
                         Toast.makeText(context, "Gasto deletado!", Toast.LENGTH_SHORT).show();
                         cardView.setVisibility(View.GONE);
+                    } else {
+                        Toast.makeText(context, "Gasto não deletado!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            myRef2.removeValue();
+        }
+    }
+
+    public void deletarGasto(Usuario usuario, Gasto gasto, final FiltrarGastos activity) {
+        if (canDo) {
+            Toast.makeText(context, "Deletando gasto...", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Deletando gasto...");
+            DatabaseReference myRef =
+                    database.getReference("users/" + usuario.getUid() + "/gastos/" + gasto.getUid());
+
+            DatabaseReference myRef2 =
+                    database.getReference("users/" + usuario.getUid() + "/dias/"
+                            + gasto.getData() + "/" + gasto.getUid());
+
+            myRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(context, "Gasto deletado!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(context, "Gasto não deletado!", Toast.LENGTH_SHORT).show();
                     }

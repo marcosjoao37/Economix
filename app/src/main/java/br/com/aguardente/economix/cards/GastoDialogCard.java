@@ -1,5 +1,6 @@
 package br.com.aguardente.economix.cards;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
@@ -21,14 +22,14 @@ import br.com.aguardente.economix.models.Gasto;
  * Created by joao on 30/04/17.
  */
 
-public class GastoCard extends RecyclerView.Adapter<GastoCard.MyViewHolder> {
+public class GastoDialogCard extends RecyclerView.Adapter<GastoDialogCard.MyViewHolder> {
 
     private View view;
     private List<Gasto> gastoList;
     private LayoutInflater inflater;
     private int count = 0;
 
-    public GastoCard(View view, List<Gasto> gastoList) {
+    public GastoDialogCard(View view, List<Gasto> gastoList) {
         this.view = view;
         this.gastoList = gastoList;
         this.inflater = LayoutInflater.from(view.getContext());
@@ -36,7 +37,7 @@ public class GastoCard extends RecyclerView.Adapter<GastoCard.MyViewHolder> {
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.list_item, parent, false);
+        View view = inflater.inflate(R.layout.list_gastos_diarios_dialog, parent, false);
         MyViewHolder holder = new MyViewHolder(view);
 
         return holder;
@@ -47,7 +48,7 @@ public class GastoCard extends RecyclerView.Adapter<GastoCard.MyViewHolder> {
         Gasto gasto = gastoList.get(position);
 
         holder.sobre.setText(gasto.getSobre());
-        holder.valor.setText("Valor: R$" + gasto.getPreco());
+        holder.valor.setText("R$" + gasto.getPreco());
     }
 
     private int count() {
@@ -77,6 +78,8 @@ public class GastoCard extends RecyclerView.Adapter<GastoCard.MyViewHolder> {
             valor = (TextView) itemView.findViewById(R.id.valor);
             btnDeletar = (ImageButton) itemView.findViewById(R.id.btnDeletarGasto);
 
+            gasto = gastoList.get(count());
+
             btnDeletar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -98,15 +101,6 @@ public class GastoCard extends RecyclerView.Adapter<GastoCard.MyViewHolder> {
                     alertBuilder.show();
                 }
             });
-
-            gasto = gastoList.get(count());
-
-//            cardView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    Toast.makeText(view, "COMPROMISSO", Toast.LENGTH_LONG).show();
-//                }
-//            });
         }
     }
 }

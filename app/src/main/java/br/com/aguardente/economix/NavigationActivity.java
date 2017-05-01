@@ -21,6 +21,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,7 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import br.com.aguardente.economix.cards.GastoCard;
+import br.com.aguardente.economix.cards.GastoDialogCard;
 import br.com.aguardente.economix.conf.Static;
 import br.com.aguardente.economix.models.Gasto;
 import br.com.aguardente.economix.models.Usuario;
@@ -68,7 +69,6 @@ public class NavigationActivity extends AppCompatActivity
 
     private Map<Date, Drawable> backgroundForDateMap;
     private Map<Date, Integer> textColorForDateMap;
-    private List<Gasto> gastoList;
     GradientDrawable drawable;
 
     DateFormat dateFormat;
@@ -79,7 +79,7 @@ public class NavigationActivity extends AppCompatActivity
     private TextView nomeUsuario;
     private TextView emailUsuario;
 
-    private boolean started;
+    private LinearLayout carregando;
 
     private Date dateGastosInicio;
     private Date dateGastosFim;
@@ -103,15 +103,15 @@ public class NavigationActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         View header = navigationView.getHeaderView(0);
 
-        started = false;
         backgroundForDateMap = new HashMap<>();
         textColorForDateMap = new HashMap<>();
-        gastoList = new ArrayList<>();
         dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         totalGasto = 0.0;
         txtTotalGasto = (TextView) findViewById(R.id.totalGasto);
         nomeUsuario = (TextView) header.findViewById(R.id.nome);
         emailUsuario = (TextView) header.findViewById(R.id.email);
+
+        carregando = (LinearLayout) findViewById(R.id.carregando);
 
         drawable = new GradientDrawable();
         drawable.setShape(GradientDrawable.RECTANGLE);
@@ -134,7 +134,6 @@ public class NavigationActivity extends AppCompatActivity
 
             database = FirebaseDatabase.getInstance();
             carregarCalendario();
-            started = true;
         }
     }
 
@@ -148,28 +147,6 @@ public class NavigationActivity extends AppCompatActivity
         }
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.navigation, menu);
-//        return true;
-//    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -177,7 +154,7 @@ public class NavigationActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_listar_todos_gastos) {
-            Toast.makeText(activity, "Em breve...", Toast.LENGTH_SHORT).show();
+            filtrarGastos();
         } else if (id == R.id.nav_compartilhar) {
             Toast.makeText(activity, "Em breve...", Toast.LENGTH_SHORT).show();
         }
@@ -229,16 +206,25 @@ public class NavigationActivity extends AppCompatActivity
                         dataChanges();
                     }
                 };
+            } else {
+                dataChanges();
             }
 
             caldroidFragment.setCaldroidListener(caldroidListener);
             android.support.v4.app.FragmentTransaction t = getSupportFragmentManager().beginTransaction();
             t.replace(R.id.calendario, caldroidFragment);
             t.commit();
+        } else {
+            dataChanges();
         }
     }
 
     public void dataChanges() {
+        totalGasto = 0.0;
+        txtTotalGasto.setText(totalGasto + "");
+
+        carregando.setVisibility(View.VISIBLE);
+
         if (database != null) {
             Query query = database.getReference("users/" + Static.usuario.getUid() + "/gastos")
                     .orderByChild("data").startAt(dateGastosInicio.getTime()).endAt(dateGastosFim.getTime());
@@ -251,8 +237,6 @@ public class NavigationActivity extends AppCompatActivity
 
             backgroundForDateMap = new HashMap<>();
             textColorForDateMap = new HashMap<>();
-
-            totalGasto = 0.0;
 
             gastosChangedListener = new ChildEventListener() {
                 @Override
@@ -270,6 +254,8 @@ public class NavigationActivity extends AppCompatActivity
 
                     totalGasto = totalGasto + gasto.getPreco();
                     txtTotalGasto.setText("R$ " + totalGasto);
+
+                    carregando.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -277,11 +263,6 @@ public class NavigationActivity extends AppCompatActivity
                     Gasto gasto = dataSnapshot.getValue(Gasto.class);
                     Log.d(TAG, "MODIFICADO: " + gasto.getSobre() + " " + gasto.getPreco()
                             + " " + dataSnapshot.getKey());
-//                        List<Date> dates = new ArrayList<>();
-//                        dates.add(new Date(gasto.getData()));
-//                        caldroidFragment.clearBackgroundDrawableForDates(dates);
-//                        caldroidFragment.clearTextColorForDates(dates);
-//                        caldroidFragment.refreshView();
                 }
 
                 @Override
@@ -304,15 +285,35 @@ public class NavigationActivity extends AppCompatActivity
             };
 
             query.addChildEventListener(gastosChangedListener);
+
+            new CountDownTimer(4000, 100) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    if (totalGasto > 0) {
+                        onFinish();
+                        cancel();
+                    }
+                }
+
+                @Override
+                public void onFinish() {
+                    carregando.setVisibility(View.GONE);
+
+                    if (totalGasto == 0) {
+                        Toast.makeText(activity, "Nenhum gasto neste mês!",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }.start();
         }
-    }
-
-    private void atualizarValorGasto() {
-
     }
 
     public void gastei(View view) {
         startActivityForResult(new Intent(activity, CadastrarGasto.class), CADASTRAR_GASTO);
+    }
+
+    public void filtrarGastos() {
+        startActivity(new Intent(activity, FiltrarGastos.class));
     }
 
     @Override
@@ -334,6 +335,8 @@ public class NavigationActivity extends AppCompatActivity
     }
 
     private void criarDialogoGastosDoDia(final Date date) {
+        carregando.setVisibility(View.VISIBLE);
+
         final List<Gasto> gastoList = new ArrayList<>();
 
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(activity);
@@ -394,22 +397,16 @@ public class NavigationActivity extends AppCompatActivity
 
             @Override
             public void onFinish() {
+                carregando.setVisibility(View.GONE);
+
                 if (gastoList.size() == 0) {
                     alertBuilder.setMessage("Nenhum gasto neste dia!");
                 } else {
                     RecyclerView recyclerView = (RecyclerView) dialogView.findViewById(R.id.recycleViewGastosDiarios);
-                    GastoCard gastoCard = new GastoCard(dialogView, gastoList);
-                    recyclerView.setAdapter(gastoCard);
+                    GastoDialogCard gastoDialogCard = new GastoDialogCard(dialogView, gastoList);
+                    recyclerView.setAdapter(gastoDialogCard);
                     recyclerView.setLayoutManager(new LinearLayoutManager(dialogView.getContext(),
                             LinearLayoutManager.VERTICAL, false));
-//                    ArrayAdapter<String> adapter = new ArrayAdapter<>(activity,
-//                            android.R.layout.select_dialog_item, gastoList);
-//                    alertBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            Toast.makeText(activity, "CLICOU: " + which, Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
                 }
 
                 alertBuilder.show();
@@ -435,11 +432,8 @@ public class NavigationActivity extends AppCompatActivity
                         currentUser.getDisplayName() // username
                 );
             }
-            if (!started) {
-                database = FirebaseDatabase.getInstance();
-                carregarCalendario();
-                started = true;
-            }
+            database = FirebaseDatabase.getInstance();
+            carregarCalendario();
         }
     }
 }

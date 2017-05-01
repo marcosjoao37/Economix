@@ -7,10 +7,10 @@
                 android:id="@+id/nav_listar_todos_gastos"
                 android:icon="@mipmap/ic_list_black_24dp"
                 android:title="Listar" />
-            <item
-                android:id="@+id/nav_compartilhar"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Compartilhar" />
+            <!--<item-->
+                <!--android:id="@+id/nav_compartilhar"-->
+                <!--android:icon="@drawable/ic_menu_share"-->
+                <!--android:title="Compartilhar" />-->
         </menu>
     </item>
 
