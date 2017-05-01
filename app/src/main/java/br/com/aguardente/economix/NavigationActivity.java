@@ -155,9 +155,10 @@ public class NavigationActivity extends AppCompatActivity
 
         if (id == R.id.nav_listar_todos_gastos) {
             filtrarGastos();
-        } else if (id == R.id.nav_compartilhar) {
-            Toast.makeText(activity, "Em breve...", Toast.LENGTH_SHORT).show();
         }
+//        else if (id == R.id.nav_compartilhar) {
+//            Toast.makeText(activity, "Em breve...", Toast.LENGTH_SHORT).show();
+//        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
