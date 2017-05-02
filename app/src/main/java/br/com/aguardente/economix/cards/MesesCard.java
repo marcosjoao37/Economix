@@ -35,6 +35,8 @@ public class MesesCard extends RecyclerView.Adapter<MesesCard.MyViewHolder> {
         this.activity = (FiltrarGastos) activity;
         this.mesesList = mesesList;
         this.inflater = LayoutInflater.from(activity);
+
+        System.out.println(this.mesesList.size());
     }
 
     @Override
@@ -61,19 +63,17 @@ public class MesesCard extends RecyclerView.Adapter<MesesCard.MyViewHolder> {
         return mesesList.size();
     }
 
-    class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
 
         CardView cardView;
-        MyViewHolder viewHolder;
         TextView txtMes;
-        public String mesSelecionado;
+        String mesSelecionado;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
             mesSelecionado = mesesList.get(count());
 
-            viewHolder = this;
             cardView = (CardView) itemView.findViewById(R.id.cardView);
             txtMes = (TextView) itemView.findViewById(R.id.mes);
 

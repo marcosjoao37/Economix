@@ -42,6 +42,7 @@ public class FiltrarGastos extends AppCompatActivity {
     private Date dateGastosInicio;
     private Date dateGastosFim;
 
+    private RecyclerView recyclerViewGastoMes;
     private GastoMesCard gastoMesesCard;
 
     public TextView txtMes;
@@ -77,16 +78,18 @@ public class FiltrarGastos extends AppCompatActivity {
         meses.add("Novembro");
         meses.add("Dezembro");
 
+        System.out.println(meses.size());
+
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycleViewMeses);
         MesesCard mesesCard = new MesesCard(activity, meses);
         recyclerView.setAdapter(mesesCard);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity,
                 LinearLayoutManager.HORIZONTAL, false));
 
-        RecyclerView recyclerView2 = (RecyclerView) findViewById(R.id.recycleViewGastosPorMes);
+        recyclerViewGastoMes = (RecyclerView) findViewById(R.id.recycleViewGastosPorMes);
         gastoMesesCard = new GastoMesCard(activity, gastos);
-        recyclerView2.setAdapter(gastoMesesCard);
-        recyclerView2.setLayoutManager(new LinearLayoutManager(activity,
+        recyclerViewGastoMes.setAdapter(gastoMesesCard);
+        recyclerViewGastoMes.setLayoutManager(new LinearLayoutManager(activity,
                 LinearLayoutManager.VERTICAL, false));
 
         database = FirebaseDatabase.getInstance();
@@ -176,6 +179,9 @@ public class FiltrarGastos extends AppCompatActivity {
             }
         };
         query.addChildEventListener(childEventListener);
+
+        gastoMesesCard = new GastoMesCard(activity, gastos);
+        recyclerViewGastoMes.setAdapter(gastoMesesCard);
 
         gastoMesesCard.notifyDataSetChanged();
 

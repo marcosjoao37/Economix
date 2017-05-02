@@ -401,16 +401,27 @@ public class NavigationActivity extends AppCompatActivity
                 carregando.setVisibility(View.GONE);
 
                 if (gastoList.size() == 0) {
-                    alertBuilder.setMessage("Nenhum gasto neste dia!");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            alertBuilder.setMessage("Nenhum gasto neste dia!");
+                            alertBuilder.show();
+                        }
+                    });
                 } else {
-                    RecyclerView recyclerView = (RecyclerView) dialogView.findViewById(R.id.recycleViewGastosDiarios);
-                    GastoDialogCard gastoDialogCard = new GastoDialogCard(dialogView, gastoList);
-                    recyclerView.setAdapter(gastoDialogCard);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(dialogView.getContext(),
-                            LinearLayoutManager.VERTICAL, false));
-                }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            RecyclerView recyclerView = (RecyclerView) dialogView.findViewById(R.id.recycleViewGastosDiarios);
+                            GastoDialogCard gastoDialogCard = new GastoDialogCard(dialogView, gastoList);
+                            recyclerView.setAdapter(gastoDialogCard);
+                            recyclerView.setLayoutManager(new LinearLayoutManager(dialogView.getContext(),
+                                    LinearLayoutManager.VERTICAL, false));
 
-                alertBuilder.show();
+                            alertBuilder.show();
+                        }
+                    });
+                }
             }
         }.start();
     }
